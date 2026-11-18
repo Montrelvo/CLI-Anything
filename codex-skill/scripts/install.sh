@@ -8,6 +8,24 @@ REPO_ROOT="$(cd "${SKILL_DIR}/.." && pwd)"
 PLUGIN_DIR="${REPO_ROOT}/cli-anything-plugin"
 PREVIEW_PROTOCOL="${REPO_ROOT}/docs/PREVIEW_PROTOCOL.md"
 DEST_ROOT="${CODEX_HOME:-$HOME/.codex}/skills"
+usage() {
+  echo "Usage: bash install.sh [--dest-root DIRECTORY]"
+  echo "Install a self-contained skill; managed hosts may supply their skill checkout."
+}
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dest-root)
+      if [[ $# -lt 2 || -z "$2" || "$2" == --* ]]; then
+        echo "--dest-root requires a directory" >&2
+        exit 2
+      fi
+      DEST_ROOT="$2"
+      shift 2
+      ;;
+    -h|--help) usage; exit 0 ;;
+    *) usage >&2; exit 2 ;;
+  esac
+done
 DEST_DIR="${DEST_ROOT}/cli-anything"
 STAGING_DIR=""
 
@@ -59,4 +77,4 @@ mv "${STAGING_DIR}" "${DEST_DIR}"
 
 echo "Installed Codex skill to: ${DEST_DIR}"
 echo "Vendored CLI-Anything methodology resources into the installed skill."
-echo "Restart Codex to pick up the new skill."
+echo "Refresh the host skill list if the skill is not yet visible."
