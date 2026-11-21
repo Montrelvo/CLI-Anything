@@ -617,7 +617,10 @@ into the installed skill's `references/` and `scripts/` directories.
 This keeps the Codex skill self-contained while using `cli-anything-plugin/` as
 the source of truth.
 
-Restart Codex after installation so it is discovered.
+Refresh the host skill list if the skill is not yet visible.
+
+For cloud or managed installations, see [Codex cloud setup](codex-skill/references/CLOUD.md).
+The Bash installer accepts `--dest-root DIRECTORY`; PowerShell accepts `-DestRoot DIRECTORY`.
 
 **Step 2: Use CLI-Anything from Codex**
 

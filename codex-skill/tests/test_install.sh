@@ -90,3 +90,39 @@ grep -q 'Cannot find canonical CLI-Anything resources' "${DETACHED_LOG}" ||
   fail "detached install did not explain the missing canonical resources"
 
 echo "PASS: Codex skill installer vendors the complete CLI-Anything resource set."
+
+# A managed host may install into its own checkout, independently of CODEX_HOME.
+MANAGED_ROOT="${TMP_DIR}/managed skills"
+CODEX_HOME="${CODEX_HOME}" bash "${SKILL_DIR}/scripts/install.sh" --dest-root "${MANAGED_ROOT}"
+assert_file "${MANAGED_ROOT}/cli-anything/references/CLOUD.md"
+assert_same "${SKILL_DIR}/references/CLOUD.md" "${MANAGED_ROOT}/cli-anything/references/CLOUD.md"
+assert_file "${MANAGED_ROOT}/cli-anything/scripts/doctor.py"
+if bash "${SKILL_DIR}/scripts/install.sh" --dest-root >/dev/null 2>&1; then
+  fail "installer accepted --dest-root without a value"
+fi
+if bash "${SKILL_DIR}/scripts/install.sh" --unknown >/dev/null 2>&1; then
+  fail "installer accepted an unknown argument"
+fi
+if bash "${SKILL_DIR}/scripts/install.sh" --dest-root "${MANAGED_ROOT}" >/dev/null 2>&1; then
+  fail "installer overwrote a managed skill"
+fi
+python3 - "${MANAGED_ROOT}/cli-anything/scripts/doctor.py" <<'PY'
+import importlib.util
+import pathlib
+import sys
+from unittest.mock import patch
+spec = importlib.util.spec_from_file_location("doctor", sys.argv[1])
+doctor = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(doctor)
+root = pathlib.Path(sys.argv[1]).parent.parent
+with patch.object(doctor.importlib.util, "find_spec", return_value=object()), \
+     patch.object(doctor.shutil, "which", return_value="/usr/bin/backend"):
+    assert doctor.diagnose(root, ["backend"])["ok"]
+with patch.object(doctor.shutil, "which", return_value=None):
+    report = doctor.diagnose(root, ["missing-backend"])
+    assert not report["ok"]
+    assert report["checks"][-1]["kind"] == "backend"
+(root / "references/HARNESS.md").unlink()
+assert not doctor.diagnose(root, [])["ok"]
+PY
+echo "PASS: managed destination, cloud resources, and diagnostics."

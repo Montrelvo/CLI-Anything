@@ -7,6 +7,14 @@ description: Use when the user wants Codex to build, refine, test, validate, or 
 
 Use this skill when the user wants Codex to act like the `CLI-Anything` builder.
 
+## Codex and Cloud Execution
+
+Read [references/CLOUD.md](references/CLOUD.md) for managed/cloud setup, backend
+checks, and the distinction between CLI harnesses and MCP servers. Use Codex's
+available shell and file tools; interpret Claude slash-command examples as mode
+specifications, not executable shell commands. Do not launch Claude or a second
+model runtime to execute this workflow.
+
 ## Read the Full Methodology First
 
 Before implementation, use the full methodology source of truth:

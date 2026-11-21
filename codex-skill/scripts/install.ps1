@@ -1,3 +1,5 @@
+param([string]$DestRoot)
+
 $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -14,7 +16,7 @@ $codexHome = if ($env:CODEX_HOME) {
     throw "CODEX_HOME is not set and USERPROFILE is unavailable."
 }
 
-$destRoot = Join-Path $codexHome "skills"
+if (-not $DestRoot) { $DestRoot = Join-Path $codexHome "skills" }
 $destDir = Join-Path $destRoot "cli-anything"
 $stagingDir = $null
 
@@ -64,4 +66,4 @@ try {
 
 Write-Host "Installed Codex skill to: $destDir"
 Write-Host "Vendored CLI-Anything methodology resources into the installed skill."
-Write-Host "Restart Codex to pick up the new skill."
+Write-Host "Refresh the host skill list if the skill is not yet visible."
